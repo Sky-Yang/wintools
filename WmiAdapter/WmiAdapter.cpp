@@ -56,6 +56,7 @@ int _tmain(int argc, _TCHAR* argv[])
             std::wcout << attr->c_str() << L": " << iter->AttrsInt[attr->c_str()] << std::endl;
         }
     }
+    system("pause");
     return 0;   // Program successfully completed.
 }
 

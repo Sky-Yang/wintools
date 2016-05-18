@@ -73,3 +73,47 @@ bool DetectsSSD(const std::wstring& physical_drive)
     return !!dtd.TrimEnabled;
 }
 
+
+std::vector<std::wstring> GetSSDDriveString()
+{
+    DWORD len = GetLogicalDriveStrings(0, nullptr);
+    std::wstring drive_string(L"");
+    drive_string.resize(len + 1);
+    len = GetLogicalDriveStrings(len, &drive_string.front());
+
+    bool found = false;
+    std::vector<std::wstring> drives;
+    std::wstring name(L"");
+    for (int i = 0; i < static_cast<int>(len); i++)
+    {
+        if (drive_string[i] == L'\0')
+        {
+            continue;
+        }
+        else
+        {
+            name = drive_string[i];
+            name += L":";
+            i += 2;
+        }
+
+        switch (GetDriveType(name.c_str()))
+        {
+            case DRIVE_FIXED:
+            case DRIVE_REMOVABLE:
+                break;
+            default:
+                continue;
+                break;
+        }
+
+        name = GetPhysicalDriveString(name);
+        if (!DetectsSSD(name))
+            continue;
+
+        drives.push_back(name);
+        name = L"";
+    }
+
+    return drives;
+}
