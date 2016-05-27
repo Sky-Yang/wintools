@@ -207,8 +207,8 @@ std::vector<std::wstring> GetVideoDevices(CONST GUID *pClassGuid,
             reinterpret_cast<PBYTE>(szClass), sizeof(szClass),
             &dwSize))
         {
-            if (wcscmp(szClass, L"Display") != 0)
-                continue;
+            //if (wcscmp(szClass, L"Display") != 0)
+            //    continue;
         }
 
         if (SetupDiGetDeviceRegistryProperty(hDevInfo, &DeviceInfoData,
@@ -353,6 +353,9 @@ int GetVideoMemoryViaDirectDraw(
 
 std::map<std::wstring, int> GetVideoMemory()
 {
+    std::vector<std::wstring>&& disk_dirve =
+        GetVideoDevices(&GUID_DEVCLASS_DISKDRIVE, NULL);
+
     std::vector<std::wstring>&& video_cards =
         GetVideoDevices(&GUID_DEVCLASS_DISPLAY, NULL);
 

@@ -8,6 +8,7 @@
 #include <tchar.h>
 #include <map>
 #include <vector>
+#include <set>
 #include <string>
 #include <iostream>
 #include <cassert>
@@ -18,9 +19,59 @@
 
 //#pragma comment(lib, "dxgi.lib")
 
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+#define STATUS_PRIVILEGE_NOT_HELD ((NTSTATUS)0xC0000061L)
+
+BOOL GetPrivilege(HANDLE TokenHandle, LPCSTR lpName, int flags)
+{
+    BOOL bResult;
+    DWORD dwBufferLength;
+    LUID luid;
+    TOKEN_PRIVILEGES tpPreviousState;
+    TOKEN_PRIVILEGES tpNewState;
+
+    dwBufferLength = 16;
+    bResult = LookupPrivilegeValueA(0, lpName, &luid);
+    if (bResult)
+    {
+        tpNewState.PrivilegeCount = 1;
+        tpNewState.Privileges[0].Luid = luid;
+        tpNewState.Privileges[0].Attributes = 0;
+        bResult = AdjustTokenPrivileges(
+            TokenHandle, 0, &tpNewState,
+            (LPBYTE)&(tpNewState.Privileges[1]) - (LPBYTE)&tpNewState,
+            &tpPreviousState, &dwBufferLength);
+        if (bResult)
+        {
+            tpPreviousState.PrivilegeCount = 1;
+            tpPreviousState.Privileges[0].Luid = luid;
+            tpPreviousState.Privileges[0].Attributes = flags != 0 ? 2 : 0;
+            bResult = AdjustTokenPrivileges(TokenHandle, 0, &tpPreviousState,
+                                            dwBufferLength, 0, 0);
+        }
+    }
+    return bResult;
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+    //HANDLE hProcess = GetCurrentProcess();
+    //HANDLE hToken;
+    //if (!OpenProcessToken(hProcess, TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES, &hToken))
+    //{
+    //    fwprintf(stderr, L"Can't open current process token\n");
+    //    return 1;
+    //}
+
+    //if (!GetPrivilege(hToken, "SeProfileSingleProcessPrivilege", 1))
+    //{
+    //    fwprintf(stderr, L"Can't get SeProfileSingleProcessPrivilege\n");
+    //    return 1;
+    //}
+
+    //CloseHandle(hToken);
+
+
     ////if (HasWDDMDriver())
     //{
     //    IDXGIFactory * pFactory;
@@ -89,7 +140,7 @@ int _tmain(int argc, _TCHAR* argv[])
     printf("\n");
 
     printf("SSD Geometry:\n");
-    std::vector<std::wstring> ssd = GetSSDDriveString();
+    std::set<std::wstring> ssd = GetSSDDriveString();
     for (auto iter = ssd.begin(); iter != ssd.end(); ++iter)
     {
         int size = 0;

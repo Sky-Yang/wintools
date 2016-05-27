@@ -34,12 +34,10 @@ int _tmain(int argc, _TCHAR* argv[])
         }
     }
 
-    wql = L"Select * from Win32_DesktopMonitor";
+    wql = L"Select * from Win32_DiskDrive";
     attrs.clear();
-    attrs.push_back(L"ScreenWidth");
-    attrs.push_back(L"ScreenHeight");
-    attrs.push_back(L"PixelsPerXLogicalInch");
-    attrs.push_back(L"PixelsPerYLogicalInch");
+    attrs.push_back(L"Caption");
+    attrs.push_back(L"Size");
     results.clear();
 
     if (!WmiAdapter::Query(wql, attrs, &results))
@@ -48,12 +46,17 @@ int _tmain(int argc, _TCHAR* argv[])
     }
 
     std::wcout << std::endl;
-    std::wcout << L"Displayer:" << std::endl;
+    std::wcout << L"Win32_DiskDrive:" << std::endl;
     for (auto iter = results.begin(); iter != results.end(); ++iter)
     {
         for (auto attr = attrs.begin(); attr != attrs.end(); ++attr)
         {
-            std::wcout << attr->c_str() << L": " << iter->AttrsInt[attr->c_str()] << std::endl;
+            if (L"Size" == *attr)
+            {
+                std::wcout << attr->c_str() << L": " << _wtoi64(iter->AttrsString[attr->c_str()].c_str()) / 1000/1000/1000 << std::endl;                
+            }
+            else
+                std::wcout << attr->c_str() << L": " << iter->AttrsString[attr->c_str()] << std::endl;
         }
     }
     system("pause");

@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WmiAdapter", "WmiAdapter\Wm
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeviceInfo", "DeviceInfo\DeviceInfo.vcxproj", "{A448B308-5695-4BAD-8899-2CAEEAD9B395}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "firewall", "firewall\firewall.vcxproj", "{8C0AD921-F67E-4642-8E40-03C6324E17E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,6 +29,10 @@ Global
 		{A448B308-5695-4BAD-8899-2CAEEAD9B395}.Debug|Win32.Build.0 = Debug|Win32
 		{A448B308-5695-4BAD-8899-2CAEEAD9B395}.Release|Win32.ActiveCfg = Release|Win32
 		{A448B308-5695-4BAD-8899-2CAEEAD9B395}.Release|Win32.Build.0 = Release|Win32
+		{8C0AD921-F67E-4642-8E40-03C6324E17E9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8C0AD921-F67E-4642-8E40-03C6324E17E9}.Debug|Win32.Build.0 = Debug|Win32
+		{8C0AD921-F67E-4642-8E40-03C6324E17E9}.Release|Win32.ActiveCfg = Release|Win32
+		{8C0AD921-F67E-4642-8E40-03C6324E17E9}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
