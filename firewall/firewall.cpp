@@ -196,6 +196,7 @@ int _tmain(int argc, _TCHAR* argv[])
         printf("    -r : remove from firewall while list.\n");
         printf("    caption : the name in while list.\n");
         printf("    path : path of the application.\n");
+        printf("\nWarning: please enter the right parameter.\n");
         return 0;
     }
 
@@ -203,13 +204,13 @@ int _tmain(int argc, _TCHAR* argv[])
     HANDLE hToken;
     if (!OpenProcessToken(hProcess, TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES, &hToken))
     {
-        fwprintf(stderr, L"Can't open current process token\n");
+        fwprintf(stderr, L"Warning: can't open current process token\n");
         return 1;
     }
 
     if (!GetPrivilege(hToken, "SeProfileSingleProcessPrivilege", 1))
     {
-        fwprintf(stderr, L"Can't get SeProfileSingleProcessPrivilege\n");
+        fwprintf(stderr, L"Warning: can't get SeProfileSingleProcessPrivilege\n");
         return 1;
     }
 
@@ -232,6 +233,18 @@ int _tmain(int argc, _TCHAR* argv[])
         result = AddFirewallException(argv[2], argv[3]);
     else if (2 == action)
         result = RemoveFirewallException(argv[2]);
+
+    if (result)
+    {
+        if (1 == action)
+            wprintf(L"FirewallException added: %s.\n", argv[3]);
+        else if (2 == action)
+            wprintf(L"FirewallException removed: %s.\n", argv[2]);
+    }
+    else
+    {
+        printf("Warning: operation failed.\n");
+    }
 
     CoUninitialize();
     return result ? 0 : 1;

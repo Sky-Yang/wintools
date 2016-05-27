@@ -24,15 +24,15 @@ BOOL GetPrivilege(HANDLE TokenHandle, LPCSTR lpName, int flags)
         tpNewState.Privileges[0].Luid = luid;
         tpNewState.Privileges[0].Attributes = 0;
         bResult = AdjustTokenPrivileges(
-            TokenHandle, 0, &tpNewState, 
-            (LPBYTE)&(tpNewState.Privileges[1]) - (LPBYTE)&tpNewState, 
+            TokenHandle, 0, &tpNewState,
+            (LPBYTE)&(tpNewState.Privileges[1]) - (LPBYTE)&tpNewState,
             &tpPreviousState, &dwBufferLength);
         if (bResult)
         {
             tpPreviousState.PrivilegeCount = 1;
             tpPreviousState.Privileges[0].Luid = luid;
             tpPreviousState.Privileges[0].Attributes = flags != 0 ? 2 : 0;
-            bResult = AdjustTokenPrivileges(TokenHandle, 0, &tpPreviousState, 
+            bResult = AdjustTokenPrivileges(TokenHandle, 0, &tpPreviousState,
                                             dwBufferLength, 0, 0);
         }
     }
@@ -64,20 +64,21 @@ int _tmain(int argc, _TCHAR* argv[])
         printf("    -m : flush modified page list.\n");
         printf("    -s : purge standby list.\n");
         printf("    -p : purge priority-0 standby list.\n");
-        return 0;
+        printf("\nError: please enter the right parameter.\n");
+        return 1;
     }
 
     HANDLE hProcess = GetCurrentProcess();
     HANDLE hToken;
     if (!OpenProcessToken(hProcess, TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES, &hToken))
     {
-        fwprintf(stderr, L"Can't open current process token\n");
+        fwprintf(stderr, L"Error: can't open current process token\n");
         return 1;
     }
 
     if (!GetPrivilege(hToken, "SeProfileSingleProcessPrivilege", 1))
     {
-        fwprintf(stderr, L"Can't get SeProfileSingleProcessPrivilege\n");
+        fwprintf(stderr, L"Error: can't get SeProfileSingleProcessPrivilege\n");
         return 1;
     }
 
@@ -86,18 +87,18 @@ int _tmain(int argc, _TCHAR* argv[])
     HMODULE ntdll = LoadLibrary(L"ntdll.dll");
     if (!ntdll)
     {
-        fwprintf(stderr, L"Can't load ntdll.dll, wrong Windows version?\n");
+        fwprintf(stderr, L"Error: Can't load ntdll.dll, wrong Windows version?\n");
         return 1;
     }
 
     typedef DWORD NTSTATUS;
     NTSTATUS(WINAPI *NtSetSystemInformation)(INT, PVOID, ULONG) =
         (NTSTATUS(WINAPI *)(INT, PVOID, ULONG))GetProcAddress(ntdll, "NtSetSystemInformation");
-    NTSTATUS(WINAPI *NtQuerySystemInformation)(INT, PVOID, ULONG, PULONG) = 
+    NTSTATUS(WINAPI *NtQuerySystemInformation)(INT, PVOID, ULONG, PULONG) =
         (NTSTATUS(WINAPI *)(INT, PVOID, ULONG, PULONG))GetProcAddress(ntdll, "NtQuerySystemInformation");
     if (!NtSetSystemInformation || !NtQuerySystemInformation)
     {
-        fwprintf(stderr, L"Can't get function addresses, wrong Windows version?\n");
+        fwprintf(stderr, L"Error: can't get function addresses, wrong Windows version?\n");
         return 1;
     }
 
@@ -117,7 +118,8 @@ int _tmain(int argc, _TCHAR* argv[])
         printf("    -m : flush modified page list.\n");
         printf("    -s : purge standby list.\n");
         printf("    -p : purge priority-0 standby list.\n");
-        return 0;
+        printf("\nError: wrong parameter.\n");
+        return 1;
     }
 
     NTSTATUS status = 0;
@@ -130,14 +132,17 @@ int _tmain(int argc, _TCHAR* argv[])
     SetCursor(LoadCursor(NULL, IDC_ARROW));
     if (status == STATUS_PRIVILEGE_NOT_HELD)
     {
-        fwprintf(stderr, 
-                 L"Insufficient privileges to execute the memory list command");
+        fwprintf(stderr,
+                 L"Error: insufficient privileges to execute the memory list command");
     }
     else if (!NT_SUCCESS(status))
     {
-        fwprintf(stderr, 
-                 L"Unable to execute the memory list command %p", status);
+        fwprintf(stderr,
+                 L"Error: unable to execute the memory list command %p", status);
     }
 
-    return NT_SUCCESS(status);
+    if (NT_SUCCESS(status))
+        wprintf(L"PurgeCache.exe %s succeed.\n", argv[1]);
+
+    return 0;
 }
