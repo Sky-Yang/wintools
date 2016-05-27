@@ -52,9 +52,7 @@ int _tmain(int argc, _TCHAR* argv[])
         for (auto attr = attrs.begin(); attr != attrs.end(); ++attr)
         {
             if (L"Size" == *attr)
-            {
-                std::wcout << attr->c_str() << L": " << _wtoi64(iter->AttrsString[attr->c_str()].c_str()) / 1000/1000/1000 << std::endl;                
-            }
+                std::wcout << attr->c_str() << L": " << _wtoi64(iter->AttrsString[attr->c_str()].c_str()) / 1000 / 1000 / 1000 << std::endl;
             else
                 std::wcout << attr->c_str() << L": " << iter->AttrsString[attr->c_str()] << std::endl;
         }
