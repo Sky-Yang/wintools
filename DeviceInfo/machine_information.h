@@ -7,5 +7,6 @@
 
 std::map<std::wstring, int> GetVideoMemory();   // in MB
 bool GetDriveGeometry(const std::wstring& drive_string, int *size); // in GB
+std::multimap<std::wstring, int> GetDriveGeometry(); // return size in GB
 
 #endif // __MACHINE_INFORMATION_H__

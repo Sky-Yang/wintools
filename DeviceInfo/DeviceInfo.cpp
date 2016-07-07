@@ -128,26 +128,22 @@ int _tmain(int argc, _TCHAR* argv[])
     //printf("Pocessor Name: \n%ls\n", GetPocessorName().c_str());
     //printf("\n");
 
-    printf("Video Memory:\n");
-    std::map<std::wstring, int> video_memory = GetVideoMemory();
-    for (auto iter = video_memory.begin(); iter != video_memory.end(); ++iter)
-    {
-        if (iter->second > 0)
-            printf("%ls (%dMB)\n", iter->first.c_str(), iter->second);
-        else
-            printf("%ls\n", iter->first.c_str());
-    }
-    printf("\n");
+    //printf("Video Memory:\n");
+    //std::map<std::wstring, int> video_memory = GetVideoMemory();
+    //for (auto iter = video_memory.begin(); iter != video_memory.end(); ++iter)
+    //{
+    //    if (iter->second > 0)
+    //        printf("%ls (%dMB)\n", iter->first.c_str(), iter->second);
+    //    else
+    //        printf("%ls\n", iter->first.c_str());
+    //}
+    //printf("\n");
 
-    printf("SSD Geometry:\n");
-    std::set<std::wstring> ssd = GetSSDDriveString();
-    for (auto iter = ssd.begin(); iter != ssd.end(); ++iter)
+    printf("Device Geometry:\n");
+    std::multimap<std::wstring, int> disk_geometry = GetDriveGeometry();
+    for (auto iter = disk_geometry.begin(); iter != disk_geometry.end(); ++iter)
     {
-        int size = 0;
-        if (GetDriveGeometry(*iter, &size))
-        {
-            printf("%ls (%dGB)\n", iter->c_str(), size);
-        }
+        printf("%ls (%dGB)\n", iter->first.c_str(), iter->second);
     }
     system("pause");
 	return 0;

@@ -11,6 +11,7 @@
 #include <d3d9.h>
 #include <ddraw.h>
 #include <cassert>
+#include <sstream>
 
 #include "atlconv.h"
 
@@ -377,42 +378,203 @@ std::map<std::wstring, int> GetVideoMemory()
 
     return video_memory;
 }
+//
+//bool GetDriveGeometry(const std::wstring& drive_string, int *size)
+//{
+//    HANDLE hDevice;               // handle to the drive to be examined 
+//    BOOL bResult;                 // results flag
+//    DWORD junk;                   // discard results
+//
+//    hDevice = CreateFile(drive_string.c_str(),  // drive 
+//                            0,                // no access to the drive
+//                            FILE_SHARE_READ | // share mode
+//                            FILE_SHARE_WRITE,
+//                            NULL,             // default security attributes
+//                            OPEN_EXISTING,    // disposition
+//                            0,                // file attributes
+//                            NULL);            // do not copy file attributes
+//
+//    if (hDevice == INVALID_HANDLE_VALUE) // cannot open the drive
+//    {
+//        return false;
+//    }
+//
+//    DISK_GEOMETRY disk_geometry;
+//    bResult = DeviceIoControl(hDevice,  // device to be queried
+//                              IOCTL_DISK_GET_DRIVE_GEOMETRY,  // operation to perform
+//                              NULL, 0, // no input buffer
+//                              &disk_geometry, sizeof(disk_geometry),  // output buffer
+//                              &junk,                 // # bytes returned
+//                              (LPOVERLAPPED)NULL);  // synchronous I/O
+//
+//    PSTORAGE_DEVICE_DESCRIPTOR pDevDesc;
+//    STORAGE_PROPERTY_QUERY Query;
+//    DWORD dwOutBytes;
+//
+//    pDevDesc = (PSTORAGE_DEVICE_DESCRIPTOR)new BYTE[sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1];
+//    pDevDesc->Size = sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1;
+//
+//    Query.PropertyId = StorageDeviceProperty;
+//    Query.QueryType = PropertyStandardQuery;
+//
+//    try
+//    {
+//        bResult = ::DeviceIoControl(hDevice,
+//                                    IOCTL_STORAGE_QUERY_PROPERTY,
+//                                    &Query, sizeof(STORAGE_PROPERTY_QUERY),
+//                                    pDevDesc, pDevDesc->Size,
+//                                    &dwOutBytes,
+//                                    (LPOVERLAPPED)NULL);
+//    }
+//    catch (...)
+//    {
+//        //MessageBox(NULL, "获取信息失败", "错误", MB_OK | MB_ICONERROR);
+//        assert(false && L"获取信息失败");
+//    }
+//
+//    if (bResult)
+//    {
+//        char *p;
+//        p = (char*)pDevDesc;
+//
+//        printf((char*)&p[pDevDesc->ProductIdOffset]);//此即为producter  
+//        printf(" ");
+//
+//        printf((char*)&p[pDevDesc->ProductRevisionOffset]);//此即为version  
+//        printf(" ");
+//
+//        printf((char*)&p[pDevDesc->VendorIdOffset]);//此即为vendor   
+//        printf("\n");
+//
+//    }
+//    else
+//    {
+//        //MessageBox(NULL, "获取信息失败", "错误", MB_OK | MB_ICONERROR);  
+//        assert(false && L"获取信息失败");
+//    }
+//
+//    CloseHandle(hDevice);
+//
+//    *size = static_cast<int>(disk_geometry.Cylinders.QuadPart *
+//                             (ULONG)disk_geometry.TracksPerCylinder *
+//                             (ULONG)disk_geometry.SectorsPerTrack *
+//                             (ULONG)disk_geometry.BytesPerSector /
+//                             (1000 * 1000 * 1000));
+//
+//    return bResult == TRUE;
+//}
 
-bool GetDriveGeometry(const std::wstring& drive_string, int *size)
+std::multimap<std::wstring, int> GetDriveGeometry()
 {
-    HANDLE hDevice;               // handle to the drive to be examined 
-    BOOL bResult;                 // results flag
-    DWORD junk;                   // discard results
+    DWORD len = GetLogicalDriveStrings(0, nullptr);
+    std::wstring drive_string(L"");
+    drive_string.resize(len + 1);
+    len = GetLogicalDriveStrings(len, &drive_string.front());
 
-    hDevice = CreateFile(drive_string.c_str(),  // drive 
-                            0,                // no access to the drive
-                            FILE_SHARE_READ | // share mode
-                            FILE_SHARE_WRITE,
-                            NULL,             // default security attributes
-                            OPEN_EXISTING,    // disposition
-                            0,                // file attributes
-                            NULL);            // do not copy file attributes
-
-    if (hDevice == INVALID_HANDLE_VALUE) // cannot open the drive
+    std::wstring name(L"");
+    std::multimap<std::wstring, int> drive_geometry;
+    std::vector<DWORD> device_number_vec;
+    for (int i = 0; i < static_cast<int>(len); i++)
     {
-        return false;
+        if (drive_string[i] == L'\0')
+        {
+            continue;
+        }
+        else
+        {
+            name = drive_string[i];
+            name += L":";
+            i += 2;
+        }
+
+        switch (GetDriveType(name.c_str()))
+        {
+            case DRIVE_FIXED:
+            case DRIVE_REMOVABLE:
+                break;
+            default:
+                continue;
+                break;
+        }
+
+        {
+            std::wstring driver_name = L"\\\\.\\" + name;
+            HANDLE drive = CreateFile(
+                driver_name.c_str(), 0, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                FILE_ATTRIBUTE_READONLY, NULL);
+
+            int error = GetLastError();
+            if (!drive)
+            {
+                continue;
+            }
+
+            STORAGE_DEVICE_NUMBER disk_number;
+            DWORD bytes_returned = 0;
+            if (!DeviceIoControl(drive, IOCTL_STORAGE_GET_DEVICE_NUMBER,
+                NULL, 0, &disk_number, sizeof(STORAGE_DEVICE_NUMBER),
+                &bytes_returned, NULL))
+            {
+                int error = GetLastError();
+                continue;
+            }
+
+            if (device_number_vec.end() !=
+                std::find(device_number_vec.begin(), device_number_vec.end(),
+                disk_number.DeviceNumber))
+                continue;
+
+            device_number_vec.push_back(disk_number.DeviceNumber);
+            std::wstringstream stream;
+            stream << L"\\\\.\\PhysicalDrive" << static_cast<int>(disk_number.DeviceNumber);
+
+            DISK_GEOMETRY disk_geometry;
+            DWORD junk; // discard results
+            if (!DeviceIoControl(drive,   // device to be queried
+                IOCTL_DISK_GET_DRIVE_GEOMETRY, // operation to perform
+                NULL, 0,   // no input buffer
+                &disk_geometry, sizeof(disk_geometry), // output buffer
+                &junk, // # bytes returned
+                (LPOVERLAPPED)NULL))   // synchronous I/O
+            {
+                continue;
+            }
+
+            int size = static_cast<int>(disk_geometry.Cylinders.QuadPart *
+                                        (ULONG)disk_geometry.TracksPerCylinder *
+                                        (ULONG)disk_geometry.SectorsPerTrack *
+                                        (ULONG)disk_geometry.BytesPerSector /
+                                        (1000 * 1000 * 1000));
+
+            PSTORAGE_DEVICE_DESCRIPTOR pDevDesc;
+            STORAGE_PROPERTY_QUERY Query;
+            DWORD dwOutBytes;
+
+            pDevDesc = (PSTORAGE_DEVICE_DESCRIPTOR)new BYTE[sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1];
+            pDevDesc->Size = sizeof(STORAGE_DEVICE_DESCRIPTOR) + 512 - 1;
+
+            Query.PropertyId = StorageDeviceProperty;
+            Query.QueryType = PropertyStandardQuery;
+
+            if (!DeviceIoControl(drive,
+                IOCTL_STORAGE_QUERY_PROPERTY,
+                &Query, sizeof(STORAGE_PROPERTY_QUERY),
+                pDevDesc, pDevDesc->Size,
+                &dwOutBytes,
+                (LPOVERLAPPED)NULL))
+            {
+                continue;
+            }
+
+            char *p = reinterpret_cast<char *>(pDevDesc);
+            std::string caption = static_cast<char *>(&p[pDevDesc->VendorIdOffset]);
+            caption += static_cast<char *>(&p[pDevDesc->ProductIdOffset]);
+
+            drive_geometry.insert(std::make_pair(std::wstring(caption.begin(), caption.end()), size));
+
+        }
+        name = L"";
     }
 
-    DISK_GEOMETRY disk_geometry;
-    bResult = DeviceIoControl(hDevice,  // device to be queried
-                              IOCTL_DISK_GET_DRIVE_GEOMETRY,  // operation to perform
-                              NULL, 0, // no input buffer
-                              &disk_geometry, sizeof(disk_geometry),  // output buffer
-                              &junk,                 // # bytes returned
-                              (LPOVERLAPPED)NULL);  // synchronous I/O
-
-    CloseHandle(hDevice);
-
-    *size = static_cast<int>(disk_geometry.Cylinders.QuadPart *
-                             (ULONG)disk_geometry.TracksPerCylinder *
-                             (ULONG)disk_geometry.SectorsPerTrack *
-                             (ULONG)disk_geometry.BytesPerSector /
-                             (1000 * 1000 * 1000));
-
-    return bResult == TRUE;
+    return drive_geometry;
 }
