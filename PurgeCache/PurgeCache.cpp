@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <windows.h>
 #include <stdio.h>
+#include <string>
 
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 #define STATUS_PRIVILEGE_NOT_HELD ((NTSTATUS)0xC0000061L)
@@ -140,7 +141,6 @@ int _tmain(int argc, _TCHAR* argv[])
         fwprintf(stderr,
                  L"Error: unable to execute the memory list command %p", status);
     }
-
     if (NT_SUCCESS(status))
         wprintf(L"PurgeCache.exe %s succeed.\n", argv[1]);
 

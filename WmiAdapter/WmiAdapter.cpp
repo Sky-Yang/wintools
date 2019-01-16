@@ -57,6 +57,30 @@ int _tmain(int argc, _TCHAR* argv[])
                 std::wcout << attr->c_str() << L": " << iter->AttrsString[attr->c_str()] << std::endl;
         }
     }
+
+    wql = L"Select * from Win32_PerfFormattedData_PerfDisk_LogicalDisk";
+    attrs.clear();
+    attrs.push_back(L"Caption");
+    attrs.push_back(L"AvgDiskQueueLength");
+    results.clear();
+
+    if (!WmiAdapter::Query(wql, attrs, &results))
+    {
+        return 1;
+    }
+
+    std::wcout << std::endl;
+    std::wcout << L"Win32_PerfFormattedData_PerfDisk_LogicalDisk:" << std::endl;
+    for (auto iter = results.begin(); iter != results.end(); ++iter)
+    {
+        for (auto attr = attrs.begin(); attr != attrs.end(); ++attr)
+        {
+            if (L"Size" == *attr)
+                std::wcout << attr->c_str() << L": " << _wtoi64(iter->AttrsString[attr->c_str()].c_str()) / 1000 / 1000 / 1000 << std::endl;
+            else
+                std::wcout << attr->c_str() << L": " << iter->AttrsString[attr->c_str()] << std::endl;
+        }
+    }
     system("pause");
     return 0;   // Program successfully completed.
 }

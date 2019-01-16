@@ -567,8 +567,15 @@ std::multimap<std::wstring, int> GetDriveGeometry()
             }
 
             char *p = reinterpret_cast<char *>(pDevDesc);
-            std::string caption = static_cast<char *>(&p[pDevDesc->VendorIdOffset]);
-            caption += static_cast<char *>(&p[pDevDesc->ProductIdOffset]);
+            std::string caption = "";
+            if (pDevDesc->VendorIdOffset > 0)
+                caption += &p[pDevDesc->VendorIdOffset];
+            //caption.erase(caption.find_last_not_of(" ") + 1);
+            caption += "|";
+            if (pDevDesc->ProductIdOffset > 0)
+                caption += &p[pDevDesc->ProductIdOffset];
+            caption += "|";
+            //caption.erase(caption.find_last_not_of(" ") + 1);
 
             drive_geometry.insert(std::make_pair(std::wstring(caption.begin(), caption.end()), size));
 

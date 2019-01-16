@@ -1,0 +1,6 @@
+/firewall/Debug
+/firewall/Release
+*.user
+*.suo
+Release
+Debug
