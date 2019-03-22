@@ -55,6 +55,12 @@ BOOL GetPrivilege(HANDLE TokenHandle, LPCSTR lpName, int flags)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+    HW_PROFILE_INFO hwProfileInfo;
+    if (GetCurrentHwProfile(&hwProfileInfo))
+        printf("GUID: %ls\n", hwProfileInfo.szHwProfileGuid);
+
+    system("pause");
+    return 0;
     //HANDLE hProcess = GetCurrentProcess();
     //HANDLE hToken;
     //if (!OpenProcessToken(hProcess, TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES, &hToken))
