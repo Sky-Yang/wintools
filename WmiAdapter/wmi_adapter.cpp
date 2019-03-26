@@ -196,6 +196,8 @@ bool WmiAdapter::Query(const std::wstring& wql,
                     result.AttrsInt[iter->c_str()] = 0;
                     result.AttrsString[iter->c_str()] = L"";
                     break;
+                case VT_DATE:
+                    break;
                 case VT_EMPTY:
                 default:
                     assert(false && L"未做类型转换！");

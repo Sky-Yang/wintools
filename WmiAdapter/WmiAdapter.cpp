@@ -10,6 +10,7 @@
 #include <ctime>
 
 
+
 void GenerateFromHW()
 {
     std::wcout << L"Hardware info:" << std::endl;
@@ -44,25 +45,60 @@ int _tmain(int argc, _TCHAR* argv[])
                 std::wcout << L"\t" << attr->c_str() << L": " << iter->AttrsString[*attr].c_str() << std::endl;
             }
         }
-        endTime = clock();
-        std::cout << "run time: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << "s" << std::endl;
-        std::wcout << std::endl;
-        GenerateFromHW();
-        system("pause");
-        return 0;
     } while (false);
 
-    std::wcout << L"Failed to get from wmi" << std::endl;
-    std::wcout << std::endl;
-
-    GenerateFromHW();
-    std::wcout << std::endl;
-    endTime = clock();
-    std::cout << "run time: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << "s" << std::endl;
-    system("pause");
-    return 0;
     attrs.clear();
     results.clear();
+
+    wql = L"Select * from Win32_UserAccount";
+    attrs.push_back(L"AccountType");
+    attrs.push_back(L"Caption");
+    attrs.push_back(L"Disabled");
+    attrs.push_back(L"InstallDate");
+    attrs.push_back(L"LocalAccount");
+    attrs.push_back(L"Lockout");
+    attrs.push_back(L"Status");
+
+    do
+    {
+        if (!WmiAdapter::Query(wql, attrs, &results))
+            break;
+
+        std::wcout << L"Win32_UserAccount:" << std::endl;
+        for (auto iter = results.begin(); iter != results.end(); ++iter)
+        {
+            for (auto attr = attrs.begin(); attr != attrs.end(); ++attr)
+            {
+                std::wcout << L"\t" << attr->c_str() << L": " << iter->AttrsString[*attr].c_str() << std::endl;
+            }
+        }
+    } while (false);
+
+    attrs.clear();
+    results.clear();
+
+    wql = L"Select * from Win32_GroupUser";
+    attrs.push_back(L"GroupComponent");
+    attrs.push_back(L"PartComponent");
+
+    do
+    {
+        if (!WmiAdapter::Query(wql, attrs, &results))
+            break;
+
+        std::wcout << L"Win32_GroupUser:" << std::endl;
+        for (auto iter = results.begin(); iter != results.end(); ++iter)
+        {
+            for (auto attr = attrs.begin(); attr != attrs.end(); ++attr)
+            {
+                std::wcout << L"\t" << attr->c_str() << L": " << iter->AttrsString[*attr].c_str() << std::endl;
+            }
+        }
+    } while (false);
+
+    attrs.clear();
+    results.clear();
+
     wql = L"Select * from Win32_VideoController";
     attrs.push_back(L"Caption");
     attrs.push_back(L"AdapterRAM");
@@ -136,6 +172,9 @@ int _tmain(int argc, _TCHAR* argv[])
         }
     }
     system("pause");
+    endTime = clock();
+    std::cout << "run time: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << "s" << std::endl;
+    std::wcout << std::endl;
     return 0;   // Program successfully completed.
 }
 
