@@ -11,19 +11,42 @@
 
 
 
-void GenerateFromHW()
+std::wstring GenerateFromHW()
 {
-    std::wcout << L"Hardware info:" << std::endl;
     std::wstring cpu_id = SystemInfo::GetInstance()->GetCPUID();
-    std::wstring mac_id = SystemInfo::GetInstance()->GetMac(0);
     std::wstring disk_id = SystemInfo::GetInstance()->GetDiskSerialAdminMode(0);
-    std::wcout << L"\tcpu_id: " << cpu_id << std::endl;
-    std::wcout << L"\tmac_id: " << mac_id << std::endl;
-    std::wcout << L"\tdisk_id: " << disk_id << std::endl;
+    std::wstring mac_id = SystemInfo::GetInstance()->GetMac(0);
+    std::wstring macs = SystemInfo::GetInstance()->GetLocalMacs();
+    std::wcout << L"cpu_id:" << cpu_id << std::endl;
+    std::wcout << L"disk_id:" << disk_id << std::endl;
+    std::wcout << L"mac_id:" << mac_id << std::endl;
+    std::wcout << L"macs:" << macs << std::endl;
+    return cpu_id + disk_id + mac_id;
 }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+    std::wstring hw_guid = GenerateFromHW();
+    TCHAR *szSubKey = _T("SOFTWARE\\Microsoft\\Cryptography");
+    HKEY hKey = nullptr;
+    std::wstring guid_reg;
+    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE, szSubKey, 0, KEY_READ|KEY_WOW64_64KEY, &hKey))
+    {
+        DWORD dwType = REG_SZ;
+        TCHAR szBuffer[1024] = { 0 };
+        DWORD dwSize = sizeof(szBuffer);
+        auto status = RegQueryValueEx(hKey, _T("MachineGuid"), 0, &dwType, reinterpret_cast<LPBYTE>(szBuffer), &dwSize);
+        if (ERROR_SUCCESS == status)
+        {
+            guid_reg = szBuffer;
+            std::wcout << L"guid_reg:" << guid_reg << std::endl;
+        }
+        if (hKey != nullptr)
+        {
+            RegCloseKey(hKey);
+        }
+    }
+
     clock_t startTime, endTime;
     startTime = clock();
     std::wstring wql = L"Select * from Win32_ComputerSystemProduct";
@@ -49,6 +72,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
     attrs.clear();
     results.clear();
+    return 0;
 
     wql = L"Select * from Win32_UserAccount";
     attrs.push_back(L"AccountType");

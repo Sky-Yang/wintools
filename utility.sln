@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PurgeCache", "PurgeCache\PurgeCache.vcxproj", "{959C5BC6-D7E5-4867-8BDD-85B1B6CA304E}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "firewall", "firewall\firewall.vcxproj", "{8C0AD921-F67E-4642-8E40-03C6324E17E9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "signtool", "signtool\signtool.vcxproj", "{1F087F2B-BDB6-46DC-97E7-CE9750D246D6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TimeError", "TimeError\TimeError.vcxproj", "{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,8 +55,19 @@ Global
 		{1F087F2B-BDB6-46DC-97E7-CE9750D246D6}.Release|Win32.Build.0 = Release|Win32
 		{1F087F2B-BDB6-46DC-97E7-CE9750D246D6}.Release|x64.ActiveCfg = Release|x64
 		{1F087F2B-BDB6-46DC-97E7-CE9750D246D6}.Release|x64.Build.0 = Release|x64
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Debug|Win32.Build.0 = Debug|Win32
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Debug|x64.ActiveCfg = Debug|x64
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Debug|x64.Build.0 = Debug|x64
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Release|Win32.ActiveCfg = Release|Win32
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Release|Win32.Build.0 = Release|Win32
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Release|x64.ActiveCfg = Release|x64
+		{3DEAF94E-F5E3-40B8-8281-398A8CDB36BD}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D87A4A9-71D9-4F05-9D02-AC94A9E07CC6}
 	EndGlobalSection
 EndGlobal
